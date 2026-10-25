@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "RSS News Ticker Configuration",
+  "description": "Configure multiple RSS/Atom feeds and display their headlines as a scrolling ticker.",
+  "properties": {
+    "feeds": {
+      "type": "array",
+      "title": "Feeds",
+      "description": "RSS/Atom feeds to rotate through. Each item supports name,url,logo,enabled,text_color.",
+      "default": [],
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string", "default": "News"},
+          "url": {"type": "string", "default": ""},
+          "logo": {"type": "string", "default": "", "description": "Local image path or http(s) URL."},
+          "enabled": {"type": "boolean", "default": true},
+          "text_color": {
+            "type": "array",
+            "items": {"type": "integer", "minimum": 0, "maximum": 255},
+            "minItems": 3,
+            "maxItems": 3,
+            "default": [255,255,255]
+          }
+        },
+        "required": ["url"],
+        "additionalProperties": false
+      }
+    },
+    "headlines_per_feed": {
+      "type": "integer",
+      "default": 3,
+      "minimum": 1,
+      "maximum": 20,
+      "description": "How many headlines from one feed are shown before rotating to the next feed."
+    },
+    "feed_rotation_seconds": {
+      "type": "number",
+      "default": 30,
+      "minimum": 2,
+      "maximum": 600,
+      "description": "Maximum time to stay on a feed batch before rotating."
+    },
+    "rss_refresh_seconds": {
+      "type": "number",
+      "default": 300,
+      "minimum": 30,
+      "maximum": 86400,
+      "description": "How often RSS feeds are refreshed."
+    },
+    "max_headlines_per_feed": {
+      "type": "integer",
+      "default": 50,
+      "minimum": 1,
+      "maximum": 200,
+      "description": "Maximum headlines cached per feed."
+    },
+    "scroll_speed_px_per_second": {
+      "type": "number",
+      "default": 30,
+      "minimum": 5,
+      "maximum": 200,
+      "description": "Ticker scroll speed in pixels per second."
+    },
+    "headline_gap_px": {
+      "type": "integer",
+      "default": 18,
+      "minimum": 4,
+      "maximum": 100,
+      "description": "Gap between consecutive headlines."
+    },
+    "logo_width": {
+      "type": "integer",
+      "default": 28,
+      "minimum": 12,
+      "maximum": 64,
+      "description": "Width of the fixed logo area on the left."
+    },
+    "background_color": {
+      "type": "array",
+      "items": {"type": "integer", "minimum": 0, "maximum": 255},
+      "minItems": 3,
+      "maxItems": 3,
+      "default": [0,0,0]
+    }
+  },
+  "additionalProperties": false
+}
