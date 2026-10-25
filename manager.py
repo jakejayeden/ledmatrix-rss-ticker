@@ -34,10 +34,12 @@ class RSSTickerPlugin(BasePlugin):
         self._load_config(config)
         self._load_font()
         self.update()
-        self.reset_cycle_state()
 
     def _load_config(self, config):
-        self.feeds = [f for f in config.get("feeds", []) if isinstance(f, dict) and f.get("enabled", True)]
+        self.feeds = [
+            f for f in config.get("feeds", [])
+            if isinstance(f, dict) and f.get("enabled", True)
+        ]
         self.headlines_per_feed = int(config.get("headlines_per_feed", 3))
         self.feed_rotation_seconds = float(config.get("feed_rotation_seconds", 30))
         self.rss_refresh_seconds = float(config.get("rss_refresh_seconds", 300))
@@ -55,8 +57,9 @@ class RSSTickerPlugin(BasePlugin):
         self._logos.clear()
         self._last_refresh = 0
         self._active_feed_pos = 0
+        self._batch = []
+        self._cycle_complete = False
         self.update()
-        self.reset_cycle_state()
 
     def _load_font(self):
         try:
@@ -72,6 +75,7 @@ class RSSTickerPlugin(BasePlugin):
         now = time.time()
         if self._last_refresh and now - self._last_refresh < self.rss_refresh_seconds:
             return
+
         for idx, feed in enumerate(self.feeds):
             url = str(feed.get("url", "")).strip()
             if not url:
@@ -97,6 +101,7 @@ class RSSTickerPlugin(BasePlugin):
             logo_ref = str(feed.get("logo", "")).strip()
             if idx not in self._logos or self._logos[idx] is None:
                 self._logos[idx] = self._load_logo(logo_ref)
+
         self._last_refresh = now
         if not self._batch:
             self._select_next_batch(initial=True)
@@ -149,7 +154,11 @@ class RSSTickerPlugin(BasePlugin):
         self._last_frame = time.monotonic()
 
     def _ticker_text(self) -> str:
-        return (" " * 4).join(self._batch)
+        # Convert the requested pixel gap to a close number of spaces for the
+        # active font. This keeps the WebUI setting meaningful across fonts.
+        space_width = max(1, self._text_width(" "))
+        spaces = max(1, int(round(self.headline_gap / space_width)))
+        return (" " * spaces).join(self._batch)
 
     def _text_width(self, text: str) -> int:
         if not text:
@@ -158,8 +167,7 @@ class RSSTickerPlugin(BasePlugin):
         return max(0, box[2] - box[0])
 
     def _advance_if_needed(self, viewport_width: int):
-        text = self._ticker_text()
-        text_width = self._text_width(text)
+        text_width = self._text_width(self._ticker_text())
         elapsed = time.monotonic() - self._batch_started
         finished_scroll = self._scroll_x > text_width + viewport_width
         timed_out = elapsed >= self.feed_rotation_seconds
@@ -181,6 +189,7 @@ class RSSTickerPlugin(BasePlugin):
         feed = self.feeds[self._current_feed_idx]
         logo_zone = min(max(12, self.logo_width), max(12, width // 2))
         logo = self._logos.get(self._current_feed_idx)
+
         if logo is not None:
             max_w = max(1, logo_zone - 2)
             max_h = max(1, height - 2)
@@ -193,7 +202,9 @@ class RSSTickerPlugin(BasePlugin):
         else:
             label = str(feed.get("name", "RSS"))[:4].upper()
             bbox = draw.textbbox((0, 0), label, font=self.font)
-            draw.text((max(0, (logo_zone - (bbox[2] - bbox[0])) // 2), max(0, (height - (bbox[3] - bbox[1])) // 2)), label, font=self.font, fill=(180, 180, 180))
+            lx = max(0, (logo_zone - (bbox[2] - bbox[0])) // 2)
+            ly = max(0, (height - (bbox[3] - bbox[1])) // 2)
+            draw.text((lx, ly), label, font=self.font, fill=(180, 180, 180))
 
         viewport_x = logo_zone + 1
         viewport_width = max(1, width - viewport_x)
@@ -218,7 +229,8 @@ class RSSTickerPlugin(BasePlugin):
             self._last_frame = now
             self._scroll_x += self.scroll_speed * dt
 
-            viewport_width = max(1, width - min(max(12, self.logo_width), max(12, width // 2)) - 1)
+            logo_zone = min(max(12, self.logo_width), max(12, width // 2))
+            viewport_width = max(1, width - logo_zone - 1)
             self._advance_if_needed(viewport_width)
             frame = self._render_frame(width, height)
 
@@ -240,7 +252,11 @@ class RSSTickerPlugin(BasePlugin):
 
     def reset_cycle_state(self):
         self._cycle_complete = False
-        self._select_next_batch(initial=True)
+        self._batch_started = time.monotonic()
+        self._scroll_x = 0.0
+        self._last_frame = time.monotonic()
+        if not self._batch:
+            self._select_next_batch(initial=True)
 
     def validate_config(self):
         if not super().validate_config():
