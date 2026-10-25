@@ -1,0 +1,26 @@
+{
+  "feeds": [
+    {
+      "name": "BBC",
+      "url": "https://feeds.bbci.co.uk/news/rss.xml",
+      "logo": "logos/bbc.png",
+      "enabled": true,
+      "text_color": [255, 255, 255]
+    },
+    {
+      "name": "Reuters",
+      "url": "https://feeds.reuters.com/reuters/topNews",
+      "logo": "https://example.com/reuters-logo.png",
+      "enabled": true,
+      "text_color": [255, 255, 255]
+    }
+  ],
+  "headlines_per_feed": 3,
+  "feed_rotation_seconds": 30,
+  "rss_refresh_seconds": 300,
+  "max_headlines_per_feed": 50,
+  "scroll_speed_px_per_second": 30,
+  "headline_gap_px": 18,
+  "logo_width": 28,
+  "background_color": [0, 0, 0]
+}
