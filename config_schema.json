@@ -7,21 +7,42 @@
     "feeds": {
       "type": "array",
       "title": "Feeds",
-      "description": "RSS/Atom feeds to rotate through. Each item supports name,url,logo,enabled,text_color.",
+      "description": "Add RSS/Atom feeds. Each row can have its own logo and text colour.",
+      "x-widget": "array-table",
+      "x-columns": ["enabled", "name", "url", "logo", "text_color"],
       "default": [],
+      "maxItems": 50,
       "items": {
         "type": "object",
         "properties": {
-          "name": {"type": "string", "default": "News"},
-          "url": {"type": "string", "default": ""},
-          "logo": {"type": "string", "default": "", "description": "Local image path or http(s) URL."},
-          "enabled": {"type": "boolean", "default": true},
+          "enabled": {"type": "boolean", "default": true, "title": "Enabled"},
+          "name": {"type": "string", "default": "News", "title": "Name"},
+          "url": {
+            "type": "string",
+            "default": "",
+            "title": "RSS URL",
+            "format": "uri",
+            "x-widget": "url-input"
+          },
+          "logo": {
+            "type": "string",
+            "default": "",
+            "title": "Logo",
+            "description": "Upload a PNG/JPEG/BMP/GIF logo for this feed.",
+            "x-widget": "file-upload-single",
+            "x-upload-config": {
+              "allowed_types": ["image/png", "image/jpeg", "image/bmp", "image/gif"],
+              "max_size_mb": 5
+            }
+          },
           "text_color": {
             "type": "array",
+            "title": "Text colour",
+            "x-widget": "color-picker",
             "items": {"type": "integer", "minimum": 0, "maximum": 255},
             "minItems": 3,
             "maxItems": 3,
-            "default": [255,255,255]
+            "default": [255, 255, 255]
           }
         },
         "required": ["url"],
@@ -40,21 +61,23 @@
       "default": 30,
       "minimum": 2,
       "maximum": 600,
-      "description": "Maximum time to stay on a feed batch before rotating."
+      "description": "Maximum time to stay on one feed batch before rotating."
     },
     "rss_refresh_seconds": {
       "type": "number",
       "default": 300,
       "minimum": 30,
       "maximum": 86400,
-      "description": "How often RSS feeds are refreshed."
+      "description": "How often RSS feeds are refreshed.",
+      "x-advanced": true
     },
     "max_headlines_per_feed": {
       "type": "integer",
       "default": 50,
       "minimum": 1,
       "maximum": 200,
-      "description": "Maximum headlines cached per feed."
+      "description": "Maximum headlines cached per feed.",
+      "x-advanced": true
     },
     "scroll_speed_px_per_second": {
       "type": "number",
@@ -68,7 +91,7 @@
       "default": 18,
       "minimum": 4,
       "maximum": 100,
-      "description": "Gap between consecutive headlines."
+      "description": "Approximate gap between consecutive headlines in pixels."
     },
     "logo_width": {
       "type": "integer",
@@ -79,10 +102,13 @@
     },
     "background_color": {
       "type": "array",
+      "title": "Background colour",
+      "x-widget": "color-picker",
       "items": {"type": "integer", "minimum": 0, "maximum": 255},
       "minItems": 3,
       "maxItems": 3,
-      "default": [0,0,0]
+      "default": [0, 0, 0],
+      "x-advanced": true
     }
   },
   "additionalProperties": false
