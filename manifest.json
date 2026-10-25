@@ -1,0 +1,26 @@
+{
+  "id": "rss-ticker",
+  "name": "RSS News Ticker",
+  "version": "0.1.0",
+  "author": "jakejayeden",
+  "description": "Display RSS/Atom news headlines as a scrolling ticker with per-feed logos and round-robin batching.",
+  "entry_point": "manager.py",
+  "class_name": "RSSTickerPlugin",
+  "category": "news",
+  "tags": ["rss", "atom", "news", "ticker", "headlines"],
+  "display_modes": ["rss-ticker"],
+  "display": {
+    "design_size": {"width": 128, "height": 32}
+  },
+  "versions": [
+    {
+      "version": "0.1.0",
+      "released": "2026-10-25",
+      "ledmatrix_min_version": "2.0.0",
+      "notes": "Initial release with multiple RSS feeds, round-robin headline batches, custom feed logos, configurable scroll speed, feed rotation interval and dynamic cycle support."
+    }
+  ],
+  "last_updated": "2026-10-25",
+  "config_schema": "config_schema.json",
+  "compatible_versions": [">=2.0.0"]
+}
