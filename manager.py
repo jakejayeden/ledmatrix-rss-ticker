@@ -17,6 +17,12 @@ from src.plugin_system.base_plugin import BasePlugin
 class RSSTickerPlugin(BasePlugin):
     """Scrolling RSS/Atom headline ticker with per-feed static logos."""
 
+    # LEDMatrix uses this flag to put animated/scroller plugins into its
+    # high-FPS ScreenRunner loop (currently paced at 8 ms / up to 125 FPS).
+    # Without it the plugin is treated as a static screen and display() is
+    # called at roughly 1 Hz, which makes a time-based ticker jump in steps.
+    enable_scrolling = True
+
     FONT_PATH = "assets/fonts/PressStart2P-Regular.ttf"
 
     def __init__(self, plugin_id, config, display_manager, cache_manager, plugin_manager):
@@ -154,8 +160,6 @@ class RSSTickerPlugin(BasePlugin):
         self._last_frame = time.monotonic()
 
     def _ticker_text(self) -> str:
-        # Convert the requested pixel gap to a close number of spaces for the
-        # active font. This keeps the WebUI setting meaningful across fonts.
         space_width = max(1, self._text_width(" "))
         spaces = max(1, int(round(self.headline_gap / space_width)))
         return (" " * spaces).join(self._batch)
